@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Resume Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">ResumeAI</span>
+    </div>
+    <span class="nav-badge">Powered by Groq + LLaMA 3.3 · ATS Optimizer</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-chip">✦ 95%+ ATS Score Guaranteed</div>
+    <h1 class="hero-title">Upload Resume.<br><em>Land Interviews.</em></h1>
+    <p class="hero-sub">Upload your existing resume + paste any job description. Our AI rewrites it to beat ATS filters and match the JD with 95%+ accuracy.</p>
+    <a href="#builder" class="hero-cta">Try It Free <span>→</span></a>
+  </div>
+  <div class="hero-cards">
+    <div class="hero-card"><span>📤</span><div><strong>Upload Resume</strong><small>PDF, DOCX, TXT</small></div></div>
+    <div class="hero-card"><span>📋</span><div><strong>Paste Job Description</strong><small>Any job posting</small></div></div>
+    <div class="hero-card"><span>🤖</span><div><strong>AI Tailors It</strong><small>ATS keywords injected</small></div></div>
+    <div class="hero-card"><span>📄</span><div><strong>Download PDF</strong><small>Ready to apply</small></div></div>
+  </div>
+</section>
+
+<!-- BUILDER -->
+<main id="builder" class="builder-section">
+  <div class="builder-grid">
+
+    <!-- LEFT: INPUT PANEL -->
+    <div class="form-panel">
+      <div class="panel-header">
+        <h2>📤 Step 1 — Upload Your Resume</h2>
+        <p>We'll extract all your information automatically</p>
+      </div>
+
+      <!-- UPLOAD ZONE -->
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('resumeFile').click()">
+        <input type="file" id="resumeFile" accept=".pdf,.docx,.txt" style="display:none" onchange="handleFileSelect(this)"/>
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">
+          <strong>Click to upload or drag & drop</strong>
+          <span>PDF, DOCX, or TXT · Max 10MB</span>
+        </div>
+      </div>
+
+      <!-- FILE STATUS -->
+      <div class="file-status" id="fileStatus" style="display:none">
+        <div class="file-info">
+          <span class="file-icon">📄</span>
+          <div class="file-details">
+            <span class="file-name" id="fileName"></span>
+            <span class="file-size" id="fileSize"></span>
+          </div>
+          <button class="remove-file" onclick="removeFile()">✕</button>
+        </div>
+        <div class="extract-status" id="extractStatus"></div>
+      </div>
+
+      <!-- EXTRACTED PREVIEW -->
+      <div class="extracted-preview" id="extractedPreview" style="display:none">
+        <div class="extracted-header">
+          <span class="extracted-badge">✅ Resume Extracted</span>
+          <button class="toggle-raw" onclick="toggleRaw()">View raw text</button>
+        </div>
+        <div class="extracted-info" id="extractedInfo"></div>
+        <div class="raw-text-box" id="rawTextBox" style="display:none">
+          <textarea id="rawText" rows="6" readonly></textarea>
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div class="step-divider">
+        <span>Step 2 — Paste the Job Description</span>
+      </div>
+
+      <!-- JD INPUT -->
+      <div class="jd-section">
+        <div class="form-group">
+          <label>📋 Job Description <span class="required">*</span></label>
+          <p class="field-hint">Paste the full job posting — title, requirements, responsibilities, everything</p>
+          <textarea id="jobDescription" rows="10" placeholder="Paste the full job description here...
+
+Example:
+Senior Software Engineer — Bangalore, India
+₹25-40 LPA | 3-6 years experience
+
+We are looking for a Senior Software Engineer to join our platform team. You will design and build scalable backend services using Python and Django. The ideal candidate has hands-on experience with microservices, Docker/Kubernetes, and AWS.
+
+Responsibilities:
+- Design RESTful APIs serving 10M+ users
+- Lead technical architecture discussions
+- Mentor junior engineers
+- Collaborate with product teams
+
+Requirements:
+- 3+ years Python experience
+- Strong knowledge of Django/FastAPI
+- Experience with PostgreSQL, Redis
+- AWS/GCP cloud experience
+- Docker & Kubernetes
+- System design skills"></textarea>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateResume()">
+        <span>✨</span>
+        <span id="btnText">Generate ATS-Optimized Resume</span>
+        <span>→</span>
+      </button>
+    </div>
+
+    <!-- RIGHT: PREVIEW PANEL -->
+    <div class="preview-panel" id="previewPanel">
+      <div class="panel-header preview-header">
+        <h2>📄 Resume Preview</h2>
+        <div class="preview-actions" id="previewActions" style="display:none">
+          <button class="action-btn" onclick="copyResume()">📋 Copy Text</button>
+          <button class="action-btn pdf-btn" onclick="exportPDF()">⬇ Download PDF</button>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-visual">
+          <div class="empty-step s1"><span>1</span> Upload Resume</div>
+          <div class="empty-arrow">→</div>
+          <div class="empty-step s2"><span>2</span> Paste JD</div>
+          <div class="empty-arrow">→</div>
+          <div class="empty-step s3"><span>3</span> Get Resume</div>
+        </div>
+        <p>Your AI-tailored resume will appear here</p>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="loading-state" id="loadingState" style="display:none">
+        <div class="loader-ring"></div>
+        <h3>Optimizing your resume...</h3>
+        <p>This takes 10–20 seconds</p>
+        <div class="loading-steps">
+          <div class="load-step" id="ls1">🔍 Parsing your resume</div>
+          <div class="load-step" id="ls2">📋 Analyzing job requirements</div>
+          <div class="load-step" id="ls3">🎯 Matching ATS keywords</div>
+          <div class="load-step" id="ls4">✍️ Rewriting content</div>
+          <div class="load-step" id="ls5">✅ Optimizing for ATS</div>
+        </div>
+      </div>
+
+      <!-- ERROR STATE -->
+      <div class="error-state" id="errorState" style="display:none">
+        <div>⚠️</div>
+        <h3>Something went wrong</h3>
+        <p id="errorMessage"></p>
+        <button onclick="resetPreview()" class="retry-btn">Try Again</button>
+      </div>
+
+      <!-- RESUME OUTPUT -->
+      <div class="resume-output" id="resumeOutput" style="display:none">
+
+        <!-- ATS Score Banner -->
+        <div class="ats-banner" id="atsBanner"></div>
+
+        <!-- Resume Card -->
+        <div class="resume-content" id="resumeContent"></div>
+
+        <!-- Improvements -->
+        <div class="improvements-box" id="improvementsBox" style="display:none">
+          <div class="imp-header" onclick="toggleImprovements()">
+            <span>🔧 What AI improved</span>
+            <span id="impArrow">▼</span>
+          </div>
+          <div class="imp-list" id="impList" style="display:none"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>AI Resume Builder · Groq + LLaMA 3.3 70B · <a href="https://console.groq.com" target="_blank">Get Groq API Key</a></p>
+</footer>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
